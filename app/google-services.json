@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "383792697142",
+    "firebase_url": "https://hydrationdedication.firebaseio.com",
+    "project_id": "hydrationdedication",
+    "storage_bucket": "hydrationdedication.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:383792697142:android:9832a5aba8f17a670e6d97",
+        "android_client_info": {
+          "package_name": "com.edgar.hydrationdedication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "383792697142-1mf8tu61g8fb03e1fin4i4p2td7sutgg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAam9B-eE2__M_esBtTBNVb7yYZi5TagkM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "383792697142-1mf8tu61g8fb03e1fin4i4p2td7sutgg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
