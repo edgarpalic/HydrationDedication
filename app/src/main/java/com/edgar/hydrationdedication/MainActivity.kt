@@ -8,6 +8,8 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -18,6 +20,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var acct: GoogleSignInAccount
 
     private var userWeight = User().weight
     private var userWorkout = User().workout
@@ -30,10 +33,11 @@ class MainActivity : AppCompatActivity() {
     private var waterDrinkDisplay = 0
 
     private val database = FirebaseDatabase.getInstance()
-    private val myRef = database.getReference("user")
+    private var myRef = database.getReference("Hydration Dedication")
 
     override fun onResume() {
         super.onResume()
+        title = "Welcome Back ${acct.givenName}"
         userCalc = User().calculation(userWeight, userWorkout, isUserActive, isUserMale, isItHot).toInt()
         waterGoal = userCalc
         savePreferences()
@@ -45,6 +49,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         auth = FirebaseAuth.getInstance()
+        acct = GoogleSignIn.getLastSignedInAccount(this)!!
 
         loadPreferences()
 
@@ -61,6 +66,7 @@ class MainActivity : AppCompatActivity() {
 
         button33cl.setOnClickListener {
             waterDrinkDisplay += 33
+            title = "Good Job ${acct.givenName}"
             savePreferences()
             updateProgressbarUI()
         }
@@ -96,7 +102,6 @@ class MainActivity : AppCompatActivity() {
 
             savePreferences()
             updateProgressbarUI()
-            Log.d("WTWFTWFWTFW", "$userWeight, $userWorkout")
         }
 
         // Heat button UX
@@ -149,14 +154,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun firebaseData() {
-        val theValue = waterDrinkDisplay.toString()
-        myRef.setValue(theValue)
+        val userId = acct.id!!
+        val myRefUser = myRef.child(userId)
+        val myRefList = myRefUser.child("Date")
+        val theValue = listOf(waterDrinkDisplay.toString(), waterGoal.toString())
+        myRefList.setValue(theValue)
 
         // Read from the database
-        myRef.addValueEventListener(object : ValueEventListener {
+        myRefList.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val value = dataSnapshot.getValue(String::class.java)
-                waterDrinkDisplay = value.toString().toInt()
+                val value = listOf(dataSnapshot.value)[0]
+                waterDrinkDisplay = 0
+                // TODO Figure out how to get this to work
             }
             override fun onCancelled(error: DatabaseError) {
                 Log.w("TAG", "Failed to read value.", error.toException())
