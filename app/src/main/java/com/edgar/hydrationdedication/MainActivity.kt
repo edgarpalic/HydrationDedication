@@ -10,7 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -24,7 +27,8 @@ class MainActivity : AppCompatActivity() {
     private var isUserMale = User().male
     private var isItHot = User().heat
 
-    private var userCalc = User().calculation(userWeight, userWorkout, isUserActive, isUserMale, isItHot).toInt()
+    private var userCalc =
+        User().calculation(userWeight, userWorkout, isUserActive, isUserMale, isItHot).toInt()
     private var waterGoal = userCalc
     private var waterDrinkDisplay = 0
 
@@ -34,7 +38,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         title = "Welcome Back ${acct.givenName}"
-        userCalc = User().calculation(userWeight, userWorkout, isUserActive, isUserMale, isItHot).toInt()
+        userCalc =
+            User().calculation(userWeight, userWorkout, isUserActive, isUserMale, isItHot).toInt()
         waterGoal = userCalc
         savePreferences()
         updateProgressbarUI()
@@ -88,14 +93,16 @@ class MainActivity : AppCompatActivity() {
 
         buttonWorkout.setOnClickListener {
             isUserActive = !isUserActive
-            if(isUserActive){
+            if (isUserActive) {
                 buttonWorkout.background.alpha = 255
                 updateProgressbarUI()
             } else {
                 buttonWorkout.background.alpha = 128
                 updateProgressbarUI()
             }
-            userCalc = User().calculation(userWeight, userWorkout, isUserActive, isUserMale, isItHot).toInt()
+            userCalc =
+                User().calculation(userWeight, userWorkout, isUserActive, isUserMale, isItHot)
+                    .toInt()
             waterGoal = userCalc
 
             savePreferences()
@@ -119,7 +126,9 @@ class MainActivity : AppCompatActivity() {
                 updateProgressbarUI()
             }
 
-            userCalc = User().calculation(userWeight, userWorkout, isUserActive, isUserMale, isItHot).toInt()
+            userCalc =
+                User().calculation(userWeight, userWorkout, isUserActive, isUserMale, isItHot)
+                    .toInt()
             waterGoal = userCalc
 
             savePreferences()
@@ -152,16 +161,92 @@ class MainActivity : AppCompatActivity() {
         goal_text.text = "$waterDrinkDisplay / $waterGoal cl"
         writeNewValue(waterDrinkDisplay, waterGoal)
 
-        progressBarCustom1.progress = 70
-        progressBarCustom2.progress = 30
-        progressBarCustom3.progress = 100
-        progressBarCustom4.progress = 80
-        progressBarCustom5.progress = 100
-        progressBarCustom6.progress = 20
-        progressBarCustom7.progress = 50
+        val userId = acct.id!!
+        val newRef = myRef.child(userId).child("oldEntries")
+
+
+        newRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val posts = ArrayList<StoreValues>()
+                for (snapshot in dataSnapshot.children) {
+                    val post = snapshot.getValue(StoreValues::class.java)
+                    posts.add(post!!)
+                }
+                posts.reverse()
+
+                if (posts.isNotEmpty()) {
+                    val dayOneWater = posts[0].water
+                    val dayOneGoal = posts[0].goal
+                    progressBarCustom1.max = dayOneGoal
+                    progressBarCustom1.progress = dayOneWater
+                } else {
+                    progressBarCustom1.progress = 0
+                }
+
+                if (posts.size > 1) {
+                    val dayTwoWater = posts[1].water
+                    val dayTwoGoal = posts[1].goal
+                    progressBarCustom2.max = dayTwoGoal
+                    progressBarCustom2.progress = dayTwoWater
+                } else {
+                    progressBarCustom2.progress = 0
+                }
+
+                if (posts.size > 2) {
+                    val dayThreeWater = posts[2].water
+                    val dayThreeGoal = posts[2].goal
+                    progressBarCustom3.max = dayThreeGoal
+                    progressBarCustom3.progress = dayThreeWater
+                } else {
+                    progressBarCustom3.progress = 0
+                }
+
+                if (posts.size > 3) {
+                    val dayFourWater = posts[3].water
+                    val dayFourGoal = posts[3].goal
+                    progressBarCustom4.max = dayFourGoal
+                    progressBarCustom4.progress = dayFourWater
+                } else {
+                    progressBarCustom4.progress = 0
+                }
+
+                if (posts.size > 4) {
+                    val dayFiveWater = posts[4].water
+                    val dayFiveGoal = posts[4].goal
+                    progressBarCustom5.max = dayFiveGoal
+                    progressBarCustom5.progress = dayFiveWater
+                } else {
+                    progressBarCustom5.progress = 0
+                }
+
+                if (posts.size > 5) {
+                    val daySixWater = posts[5].water
+                    val daySixGoal = posts[5].goal
+                    progressBarCustom6.max = daySixGoal
+                    progressBarCustom6.progress = daySixWater
+                } else {
+                    progressBarCustom6.progress = 0
+                }
+
+                if (posts.size > 6) {
+                    val daySevenWater = posts[6].water
+                    val daySevenGoal = posts[6].goal
+                    progressBarCustom7.max = daySevenGoal
+                    progressBarCustom7.progress = daySevenWater
+                } else {
+                    progressBarCustom7.progress = 0
+                }
+
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                println("The read failed: " + databaseError.code)
+            }
+        })
+
     }
 
-    class StoreValues(
+    data class StoreValues(
         var water: Int = 0,
         var goal: Int = 0
     )
@@ -172,10 +257,10 @@ class MainActivity : AppCompatActivity() {
         myRef.child(userId).child("mainEntry").setValue(newValue)
     }
 
-    private fun newDay(water: Int, goal: Int){
+    private fun newDay(water: Int, goal: Int) {
         val userId = acct.id!!
-        val oldWater = StoreValues(water, goal)
-        myRef.child(userId).child("oldEntries").push().setValue(oldWater)
+        val oldVal = StoreValues(water, goal)
+        myRef.child(userId).child("oldEntries").push().setValue(oldVal)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
