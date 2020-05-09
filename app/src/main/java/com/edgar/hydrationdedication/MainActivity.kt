@@ -4,17 +4,13 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -130,6 +126,8 @@ class MainActivity : AppCompatActivity() {
             updateProgressbarUI()
         }
         updateProgressbarUI()
+
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -153,6 +151,14 @@ class MainActivity : AppCompatActivity() {
         progressBar.progress = (((waterDrinkDisplay + waterGoal) - waterGoal))
         goal_text.text = "$waterDrinkDisplay / $waterGoal cl"
         writeNewValue(waterDrinkDisplay, waterGoal)
+
+        progressBarCustom1.progress = 70
+        progressBarCustom2.progress = 30
+        progressBarCustom3.progress = 100
+        progressBarCustom4.progress = 80
+        progressBarCustom5.progress = 100
+        progressBarCustom6.progress = 20
+        progressBarCustom7.progress = 50
     }
 
     class StoreValues(
@@ -164,7 +170,6 @@ class MainActivity : AppCompatActivity() {
         val userId = acct.id!!
         val newValue = StoreValues(water, goal)
         myRef.child(userId).child("mainEntry").setValue(newValue)
-
     }
 
     private fun newDay(water: Int, goal: Int){
