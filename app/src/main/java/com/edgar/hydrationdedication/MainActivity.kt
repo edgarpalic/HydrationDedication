@@ -72,11 +72,13 @@ class MainActivity : AppCompatActivity() {
         }
         button50cl.setOnClickListener {
             waterDrinkDisplay += 50
+            title = "Amazing Job ${acct.givenName}"
             savePreferences()
             updateProgressbarUI()
         }
         button100cl.setOnClickListener {
             waterDrinkDisplay += 100
+            title = "Incredible Job ${acct.givenName}"
             savePreferences()
             updateProgressbarUI()
         }
@@ -150,27 +152,25 @@ class MainActivity : AppCompatActivity() {
         progressBar.max = waterGoal
         progressBar.progress = (((waterDrinkDisplay + waterGoal) - waterGoal))
         goal_text.text = "$waterDrinkDisplay / $waterGoal cl"
-        firebaseData()
+        writeNewValue(waterDrinkDisplay, waterGoal)
     }
 
-    private fun firebaseData() {
-        val userId = acct.id!!
-        val myRefUser = myRef.child(userId)
-        val myRefList = myRefUser.child("Date")
-        val theValue = listOf(waterDrinkDisplay.toString(), waterGoal.toString())
-        myRefList.setValue(theValue)
+    class StoreValues(
+        var water: Int = 0,
+        var goal: Int = 0
+    )
 
-        // Read from the database
-        myRefList.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val value = listOf(dataSnapshot.value)[0]
-                waterDrinkDisplay = 0
-                // TODO Figure out how to get this to work
-            }
-            override fun onCancelled(error: DatabaseError) {
-                Log.w("TAG", "Failed to read value.", error.toException())
-            }
-        })
+    private fun writeNewValue(water: Int, goal: Int) {
+        val userId = acct.id!!
+        val newValue = StoreValues(water, goal)
+        myRef.child(userId).child("mainEntry").setValue(newValue)
+
+    }
+
+    private fun newDay(water: Int, goal: Int){
+        val userId = acct.id!!
+        val oldWater = StoreValues(water, goal)
+        myRef.child(userId).child("oldEntries").push().setValue(oldWater)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -229,6 +229,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun resetApp() {
+        newDay(waterDrinkDisplay, waterGoal)
         waterGoal = userCalc
         waterDrinkDisplay = 0
         updateProgressbarUI()
