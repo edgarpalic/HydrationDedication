@@ -15,6 +15,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
 
@@ -67,19 +68,37 @@ class MainActivity : AppCompatActivity() {
 
         button33cl.setOnClickListener {
             waterDrinkDisplay += 33
-            title = "Good Job ${acct.givenName}"
+
+            title = if (waterGoal < waterDrinkDisplay){
+                "Ok ${acct.givenName}, That's enough for today!"
+            } else {
+                "Good Job ${acct.givenName}"
+            }
+
             savePreferences()
             updateProgressbarUI()
         }
         button50cl.setOnClickListener {
             waterDrinkDisplay += 50
-            title = "Amazing Job ${acct.givenName}"
+
+            title = if (waterGoal < waterDrinkDisplay){
+                "Ok ${acct.givenName}, That's enough for today!"
+            } else {
+                "Amazing Job ${acct.givenName}"
+            }
+
             savePreferences()
             updateProgressbarUI()
         }
         button100cl.setOnClickListener {
             waterDrinkDisplay += 100
-            title = "Incredible Job ${acct.givenName}"
+
+            title = if (waterGoal < waterDrinkDisplay){
+                "Ok ${acct.givenName}, That's enough for today!"
+            } else {
+                "Incredible Job ${acct.givenName}"
+            }
+
             savePreferences()
             updateProgressbarUI()
         }
@@ -164,10 +183,10 @@ class MainActivity : AppCompatActivity() {
         val userId = acct.id!!
         val newRef = myRef.child(userId).child("oldEntries")
 
-
         newRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val posts = ArrayList<StoreValues>()
+
                 for (snapshot in dataSnapshot.children) {
                     val post = snapshot.getValue(StoreValues::class.java)
                     posts.add(post!!)
@@ -323,6 +342,7 @@ class MainActivity : AppCompatActivity() {
         waterGoal = userCalc
         waterDrinkDisplay = 0
         updateProgressbarUI()
+        title = "Welcome Back ${acct.givenName}"
     }
 
     override fun onBackPressed() {
