@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -69,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         button33cl.setOnClickListener {
             waterDrinkDisplay += 33
 
-            title = if (waterGoal < waterDrinkDisplay){
+            title = if (waterGoal < waterDrinkDisplay) {
                 "Ok ${acct.givenName}, That's enough for today!"
             } else {
                 "Good Job ${acct.givenName}"
@@ -81,7 +82,7 @@ class MainActivity : AppCompatActivity() {
         button50cl.setOnClickListener {
             waterDrinkDisplay += 50
 
-            title = if (waterGoal < waterDrinkDisplay){
+            title = if (waterGoal < waterDrinkDisplay) {
                 "Ok ${acct.givenName}, That's enough for today!"
             } else {
                 "Amazing Job ${acct.givenName}"
@@ -93,7 +94,7 @@ class MainActivity : AppCompatActivity() {
         button100cl.setOnClickListener {
             waterDrinkDisplay += 100
 
-            title = if (waterGoal < waterDrinkDisplay){
+            title = if (waterGoal < waterDrinkDisplay) {
                 "Ok ${acct.givenName}, That's enough for today!"
             } else {
                 "Incredible Job ${acct.givenName}"
@@ -191,7 +192,7 @@ class MainActivity : AppCompatActivity() {
                     val post = snapshot.getValue(StoreValues::class.java)
                     posts.add(post!!)
                 }
-                posts.reverse()
+                //posts.reverse()
 
                 if (posts.isNotEmpty()) {
                     val dayOneWater = posts[0].water
@@ -255,14 +256,12 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     progressBarCustom7.progress = 0
                 }
-
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
                 println("The read failed: " + databaseError.code)
             }
         })
-
     }
 
     data class StoreValues(
@@ -279,7 +278,76 @@ class MainActivity : AppCompatActivity() {
     private fun newDay(water: Int, goal: Int) {
         val userId = acct.id!!
         val oldVal = StoreValues(water, goal)
-        myRef.child(userId).child("oldEntries").push().setValue(oldVal)
+        val baseRef = myRef.child(userId).child("oldEntries")
+
+        val one = baseRef.child("1")
+        val two = baseRef.child("2")
+        val three = baseRef.child("3")
+        val four = baseRef.child("4")
+        val five = baseRef.child("5")
+        val six = baseRef.child("6")
+        val seven = baseRef.child("7")
+
+        // A hack to only hold 7 values inside the Realtime Database by moving the values from previous day forward once and deleting the last value.
+        baseRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {}
+            override fun onDataChange(p0: DataSnapshot) {
+                when {
+                    p0.hasChild("1") -> {
+                        if (p0.hasChild("2")) {
+                            if (p0.hasChild("3")) {
+                                if (p0.hasChild("4")) {
+                                    if (p0.hasChild("5")) {
+                                        if (p0.hasChild("6")) {
+                                            if (p0.hasChild("7")) {
+
+                                                val sixVal = p0.child("6").value
+                                                val fiveVal = p0.child("5").value
+                                                val fourVal = p0.child("4").value
+                                                val threeVal = p0.child("3").value
+                                                val twoVal = p0.child("2").value
+                                                val oneVal = p0.child("1").value
+
+                                                seven.removeValue()
+                                                seven.setValue(sixVal)
+                                                six.removeValue()
+                                                six.setValue(fiveVal)
+                                                five.removeValue()
+                                                five.setValue(fourVal)
+                                                four.removeValue()
+                                                four.setValue(threeVal)
+                                                three.removeValue()
+                                                three.setValue(twoVal)
+                                                two.removeValue()
+                                                two.setValue(oneVal)
+                                                one.removeValue()
+                                                one.setValue(oldVal)
+                                            } else {
+                                                seven.setValue(oldVal)
+                                            }
+                                        } else {
+                                            six.setValue(oldVal)
+                                        }
+                                    } else {
+                                        five.setValue(oldVal)
+                                    }
+                                } else {
+                                    four.setValue(oldVal)
+                                }
+                            } else {
+                                three.setValue(oldVal)
+                            }
+                        } else {
+                            two.setValue(oldVal)
+                        }
+                    }
+                    else -> {
+                        one.setValue(oldVal)
+                    }
+                }
+            }
+        })
+
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
