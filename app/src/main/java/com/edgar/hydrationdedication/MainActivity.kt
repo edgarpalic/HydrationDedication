@@ -162,8 +162,6 @@ class MainActivity : AppCompatActivity() {
             updateProgressbarUI()
         }
         updateProgressbarUI()
-
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -199,7 +197,10 @@ class MainActivity : AppCompatActivity() {
                     val post = snapshot.getValue(StoreValues::class.java)
                     posts.add(post!!)
                 }
-                //posts.reverse()
+
+                if (!dataSnapshot.hasChild("firstTimeUse")) {
+                    posts.reverse()
+                }
 
                 if (posts.isNotEmpty()) {
                     val dayOneWater = posts[0].water
@@ -276,6 +277,10 @@ class MainActivity : AppCompatActivity() {
         var goal: Int = 0
     )
 
+    data class FirstTimeUse(
+        var firstTimeUse: Boolean = true
+    )
+
     private fun writeNewValue(water: Int, goal: Int) {
         val userId = acct.id!!
         val newValue = StoreValues(water, goal)
@@ -285,6 +290,7 @@ class MainActivity : AppCompatActivity() {
     private fun newDay(water: Int, goal: Int) {
         val userId = acct.id!!
         val oldVal = StoreValues(water, goal)
+        val firstUse = FirstTimeUse(false)
         val baseRef = myRef.child(userId).child("oldEntries")
 
         val one = baseRef.child("1")
@@ -307,28 +313,45 @@ class MainActivity : AppCompatActivity() {
                                     if (p0.hasChild("5")) {
                                         if (p0.hasChild("6")) {
                                             if (p0.hasChild("7")) {
-
+                                                val sevenVal = p0.child("7").value
                                                 val sixVal = p0.child("6").value
                                                 val fiveVal = p0.child("5").value
                                                 val fourVal = p0.child("4").value
                                                 val threeVal = p0.child("3").value
                                                 val twoVal = p0.child("2").value
                                                 val oneVal = p0.child("1").value
-
-                                                seven.removeValue()
-                                                seven.setValue(sixVal)
-                                                six.removeValue()
-                                                six.setValue(fiveVal)
-                                                five.removeValue()
-                                                five.setValue(fourVal)
-                                                four.removeValue()
-                                                four.setValue(threeVal)
-                                                three.removeValue()
-                                                three.setValue(twoVal)
-                                                two.removeValue()
-                                                two.setValue(oneVal)
-                                                one.removeValue()
-                                                one.setValue(oldVal)
+                                                if (p0.hasChild("firstTimeUse")) {
+                                                    seven.removeValue()
+                                                    seven.setValue(sixVal)
+                                                    six.removeValue()
+                                                    six.setValue(fiveVal)
+                                                    five.removeValue()
+                                                    five.setValue(fourVal)
+                                                    four.removeValue()
+                                                    four.setValue(threeVal)
+                                                    three.removeValue()
+                                                    three.setValue(twoVal)
+                                                    two.removeValue()
+                                                    two.setValue(oneVal)
+                                                    one.removeValue()
+                                                    one.setValue(oldVal)
+                                                } else {
+                                                    seven.removeValue()
+                                                    seven.setValue(twoVal)
+                                                    six.removeValue()
+                                                    six.setValue(threeVal)
+                                                    five.removeValue()
+                                                    five.setValue(fourVal)
+                                                    four.removeValue()
+                                                    four.setValue(fiveVal)
+                                                    three.removeValue()
+                                                    three.setValue(sixVal)
+                                                    two.removeValue()
+                                                    two.setValue(sevenVal)
+                                                    one.removeValue()
+                                                    one.setValue(oldVal)
+                                                    baseRef.child("firstTimeUse").setValue(firstUse)
+                                                }
                                             } else {
                                                 seven.setValue(oldVal)
                                             }
