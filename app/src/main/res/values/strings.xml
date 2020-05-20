@@ -27,4 +27,12 @@
     <string name="_33cl">33cl</string>
     <string name="heat">Heat</string>
     <string name="exercise">Exercise</string>
+    <string name="min">Min</string>
+    <string name="weight">WEIGHT</string>
+    <string name="training_time">TRAINING TIME</string>
+    <string name="gender">GENDER</string>
+    <string name="settings">SETTINGS</string>
+    <string name="male">Male</string>
+    <string name="save">SAVE</string>
+    <string name="kg">Kg</string>
 </resources>

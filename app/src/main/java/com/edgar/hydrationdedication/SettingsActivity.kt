@@ -6,7 +6,9 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.util.Log
+import android.view.View
+import android.view.View.OnFocusChangeListener
+import android.view.inputmethod.InputMethodManager
 import kotlinx.android.synthetic.main.activity_settings.*
 
 class SettingsActivity : Activity() {
@@ -37,22 +39,22 @@ class SettingsActivity : Activity() {
         val width = dm.widthPixels
         val height = dm.heightPixels
 
-        window.setLayout((width*.8).toInt(), (height*.8).toInt())
+        window.setLayout((width * .8).toInt(), (height * .8).toInt())
         this.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT));
         // Popup window end
 
         // Gender switch start
-        if (!isUserMale){
+        if (!isUserMale) {
             genderSwitch.isChecked = true
             genderText.text = "Female"
         }
-        if (isUserMale){
+        if (isUserMale) {
             genderSwitch.isChecked = false
             genderText.text = "Male"
         }
 
         genderSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked){
+            if (isChecked) {
                 isUserMale = false
                 genderText.text = "Female"
             } else {
@@ -62,6 +64,19 @@ class SettingsActivity : Activity() {
         }
         // Gender switch end
 
+        weightText.onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                hideKeyboard(v)
+            }
+        }
+
+        trainingText.onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
+            if (!hasFocus) {
+                hideKeyboard(v)
+            }
+        }
+
+
         saveButton.setOnClickListener {
             var inputWeight = weightText.text
             var inputTraining = trainingText.text
@@ -70,6 +85,12 @@ class SettingsActivity : Activity() {
 
             saveSettings()
         }
+    }
+
+    fun hideKeyboard(view: View) {
+        val inputMethodManager: InputMethodManager =
+            getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     private fun saveSettings() {
