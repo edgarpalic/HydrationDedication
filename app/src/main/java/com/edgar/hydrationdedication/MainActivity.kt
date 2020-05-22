@@ -3,18 +3,10 @@ package com.edgar.hydrationdedication
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
-import android.graphics.Color
-import android.graphics.LightingColorFilter
-import android.graphics.PorterDuff
-import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.drawable.DrawableCompat
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseAuth
@@ -24,6 +16,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.collections.ArrayList
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -38,8 +31,8 @@ class MainActivity : AppCompatActivity() {
 
     private var userCalc =
         User().calculation(userWeight, userWorkout, isUserActive, isUserMale, isItHot).toInt()
-    private var waterGoal = userCalc
-    private var waterDrinkDisplay = 0
+    var waterGoal = userCalc
+    var waterDrinkDisplay = 0
 
     private val database = FirebaseDatabase.getInstance()
     private var myRef = database.getReference("Hydration Dedication")
@@ -74,6 +67,12 @@ class MainActivity : AppCompatActivity() {
             waterDrinkDisplay = savedInstanceState.getInt("val")
         }
 
+        buttonFunctions()
+        updateProgressbarUI()
+
+    }
+
+    private fun buttonFunctions(){
         button33cl.setOnClickListener {
             waterDrinkDisplay += 33
 
@@ -161,7 +160,6 @@ class MainActivity : AppCompatActivity() {
             savePreferences()
             updateProgressbarUI()
         }
-        updateProgressbarUI()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -377,7 +375,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
-
+    updateProgressbarUI()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
