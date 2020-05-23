@@ -15,6 +15,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.activity_main.*
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.collections.ArrayList
 
 
@@ -29,10 +31,13 @@ class MainActivity : AppCompatActivity() {
     private var isUserMale = User().male
     private var isItHot = User().heat
 
+
     private var userCalc =
         User().calculation(userWeight, userWorkout, isUserActive, isUserMale, isItHot).toInt()
-    var waterGoal = userCalc
-    var waterDrinkDisplay = 0
+    private var waterGoal = userCalc
+    private var waterDrinkDisplay = 0
+    private val currentDate: String = SimpleDateFormat("dd/MM", Locale.getDefault()).format(Date())
+    private var theDate = currentDate
 
     private val database = FirebaseDatabase.getInstance()
     private var myRef = database.getReference("Hydration Dedication")
@@ -282,7 +287,30 @@ class MainActivity : AppCompatActivity() {
     private fun writeNewValue(water: Int, goal: Int) {
         val userId = acct.id!!
         val newValue = StoreValues(water, goal)
+        val savedDate = myRef.child(userId)
         myRef.child(userId).child("mainEntry").setValue(newValue)
+
+        savedDate.addListenerForSingleValueEvent(object: ValueEventListener{
+            override fun onCancelled(p0: DatabaseError) {}
+            override fun onDataChange(p0: DataSnapshot) {
+                if(p0.hasChild("savedDate")){
+                    val dateRef = myRef.child(userId).child("savedDate")
+                    dateRef.addListenerForSingleValueEvent(object: ValueEventListener{
+                        override fun onCancelled(p0: DatabaseError) {}
+                        override fun onDataChange(p0: DataSnapshot) {
+                            val mSavedDate = p0.value
+                            if(mSavedDate != theDate){
+                                newDay(waterDrinkDisplay, waterGoal)
+                                resetApp()
+                                myRef.child(userId).child("savedDate").setValue(theDate)
+                            }
+                        }
+                    })
+                } else {
+                    myRef.child(userId).child("savedDate").setValue(theDate)
+                }
+            }
+        })
     }
 
     private fun newDay(water: Int, goal: Int) {
@@ -434,7 +462,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun resetApp() {
-        newDay(waterDrinkDisplay, waterGoal)
+        //newDay(waterDrinkDisplay, waterGoal)
         waterGoal = userCalc
         waterDrinkDisplay = 0
         updateProgressbarUI()
