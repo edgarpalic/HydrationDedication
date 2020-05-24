@@ -31,26 +31,16 @@ class MainActivity : AppCompatActivity() {
     private var isUserMale = User().male
     private var isItHot = User().heat
 
-
     private var userCalc =
         User().calculation(userWeight, userWorkout, isUserActive, isUserMale, isItHot).toInt()
     private var waterGoal = userCalc
     private var waterDrinkDisplay = 0
+
     private val currentDate: String = SimpleDateFormat("dd/MM", Locale.getDefault()).format(Date())
     private var theDate = currentDate
 
     private val database = FirebaseDatabase.getInstance()
     private var myRef = database.getReference("Hydration Dedication")
-
-    override fun onResume() {
-        super.onResume()
-        title = "Welcome Back ${acct.givenName}"
-        userCalc =
-            User().calculation(userWeight, userWorkout, isUserActive, isUserMale, isItHot).toInt()
-        waterGoal = userCalc
-        savePreferences()
-        updateProgressbarUI()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,6 +65,16 @@ class MainActivity : AppCompatActivity() {
         buttonFunctions()
         updateProgressbarUI()
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        title = "Welcome Back ${acct.givenName}"
+        userCalc =
+            User().calculation(userWeight, userWorkout, isUserActive, isUserMale, isItHot).toInt()
+        waterGoal = userCalc
+        savePreferences()
+        updateProgressbarUI()
     }
 
     private fun buttonFunctions(){
@@ -182,6 +182,7 @@ class MainActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    // The function that updates the progress bars. It is used in many places in order to not lag behind the actual data it is supposed to display.
     @SuppressLint("SetTextI18n")
     private fun updateProgressbarUI() {
         progressBar.max = waterGoal
@@ -275,21 +276,26 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    // This is needed to save the values properly on Realtime Database. Used in writeNewValue function.
     data class StoreValues(
         var water: Int = 0,
         var goal: Int = 0
     )
 
+    // A check to see if user has less than 7 saved values in the database. Used in newDay function where it runs a different set of programming based on the boolean.
     data class FirstTimeUse(
         var firstTimeUse: Boolean = true
     )
 
+    // The function which saves the daily drinking progress values to firebase. It is used in updateProgressbarUI function.
     private fun writeNewValue(water: Int, goal: Int) {
         val userId = acct.id!!
         val newValue = StoreValues(water, goal)
         val savedDate = myRef.child(userId)
         myRef.child(userId).child("mainEntry").setValue(newValue)
 
+        // Function to see if user has a saved date and if the saved date is equal to current date. If it is not, reset and update the saved date (until tomorrow).
+        // Temporary solution until a way is found to do this even when app is inactive at a specific time of the day (midnight).
         savedDate.addListenerForSingleValueEvent(object: ValueEventListener{
             override fun onCancelled(p0: DatabaseError) {}
             override fun onDataChange(p0: DataSnapshot) {
@@ -313,6 +319,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    // The daily reset function!
     private fun newDay(water: Int, goal: Int) {
         val userId = acct.id!!
         val oldVal = StoreValues(water, goal)
@@ -406,6 +413,38 @@ class MainActivity : AppCompatActivity() {
     updateProgressbarUI()
     }
 
+    // Reset button function located in the menu.
+    private fun resetApp() {
+        //newDay(waterDrinkDisplay, waterGoal)
+        waterGoal = userCalc
+        waterDrinkDisplay = 0
+        updateProgressbarUI()
+        title = "Welcome Back ${acct.givenName}"
+    }
+
+    override fun onBackPressed() {
+        savePreferences()
+        loadPreferences()
+//        super.onBackPressed()
+    }
+
+    // Log out function.
+    private fun userCheck() {
+        savePreferences()
+        auth.signOut()
+        val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun userSettings() {
+        savePreferences()
+        val intent = Intent(this, SettingsActivity::class.java)
+        intent.putExtra("oldWeight", userWeight)
+        intent.putExtra("oldWorkout", userWorkout)
+        intent.putExtra("oldGender", isUserMale)
+        startActivity(intent)
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
@@ -460,35 +499,4 @@ class MainActivity : AppCompatActivity() {
         isUserMale = getUserGender
         isItHot = getHeatInfo
     }
-
-    private fun resetApp() {
-        //newDay(waterDrinkDisplay, waterGoal)
-        waterGoal = userCalc
-        waterDrinkDisplay = 0
-        updateProgressbarUI()
-        title = "Welcome Back ${acct.givenName}"
-    }
-
-    override fun onBackPressed() {
-        savePreferences()
-        loadPreferences()
-//        super.onBackPressed()
-    }
-
-    private fun userCheck() {
-        savePreferences()
-        auth.signOut()
-        val intent = Intent(this, LoginActivity::class.java)
-        startActivity(intent)
-    }
-
-    private fun userSettings() {
-        savePreferences()
-        val intent = Intent(this, SettingsActivity::class.java)
-        intent.putExtra("oldWeight", userWeight)
-        intent.putExtra("oldWorkout", userWorkout)
-        intent.putExtra("oldGender", isUserMale)
-        startActivity(intent)
-    }
-
 }
