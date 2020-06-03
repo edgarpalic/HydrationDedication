@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
             waterDrinkDisplay += 33
 
             title = if (waterGoal < waterDrinkDisplay) {
-                "Ok ${acct.givenName}, That's enough for today!"
+                "Ok ${acct.givenName}, That's enough!"
             } else {
                 "Good Job ${acct.givenName}"
             }
@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
             waterDrinkDisplay += 50
 
             title = if (waterGoal < waterDrinkDisplay) {
-                "Ok ${acct.givenName}, That's enough for today!"
+                "Ok ${acct.givenName}, That's enough!"
             } else {
                 "Amazing Job ${acct.givenName}"
             }
@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity() {
             waterDrinkDisplay += 100
 
             title = if (waterGoal < waterDrinkDisplay) {
-                "Ok ${acct.givenName}, That's enough for today!"
+                "Ok ${acct.givenName}, That's enough!"
             } else {
                 "Incredible Job ${acct.givenName}"
             }
